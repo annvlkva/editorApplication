@@ -25,7 +25,7 @@ def indicator_get():
 def getConnections(indicator):
     try:
         response = []
-        i = Indicator.nodes.get(uid=indicator["uid"])
+        i = Indicator.nodes.get(uid=indicator["id"])
         for parent in i.indtoopk:
             obj = {
                 "from": indicator["id"],
@@ -46,37 +46,50 @@ def indicator_put(uid, new_label):
     response = {
         "id": obj.uid,
         "label": obj.label,
+        "color": "#b2fef7",
+        "level": "2",
+        "type": "Indicator",
     }
     return response
 
 def indicator_delete(uid):
-    obj = Indicator.nodes.get(uid=uid)
-    obj.delete()
-    response = {"success": "deleted"}
-    return response
+    try:
+        obj = Indicator.nodes.get(uid=uid)
+        obj.delete()
+        response = "deleted"
+        return response
+    except:
+        return "error"
 
-def indicator_post(parent_label, new_label):
+def indicator_post(parent_id, new_label):
     try:
         obj = Indicator(label=new_label)
         obj.save()
         response = {
-            "id": obj.uid
+            "id": obj.uid,
+            "label": obj.label,
+            "color": "#b2fef7",
+            "level": "2",
+            "node_type": "Indicator",
         }
-        c= postConnections(parent_label, obj.label)
+        c = postConnections(parent_id, obj.uid)
         if c != {"error": "error"}:
-            return response
+            return response, c
         return {"error": "error"}
     except Exception as e:
         return {"error": e}
 
 
-def postConnections(parent_label, new_label):
+def postConnections(parent_id, new_id):
     try:
-        obj1 = OPK.nodes.get(label=parent_label)
-        obj2 = Indicator.nodes.get(label=new_label)
-        res = obj2.indtoopk.connect(obj1)
-        response = {"result": res}
-
-        return response
+        obj1 = OPK.nodes.get(uid=parent_id)
+        obj2 = Indicator.nodes.get(uid=new_id)
+        obj2.indtoopk.connect(obj1)
+        obj = {
+            "from": obj2.uid,
+            "to": obj1.uid,
+            "arrows": "from",
+        }
+        return obj
     except:
         return {"error": "error"}

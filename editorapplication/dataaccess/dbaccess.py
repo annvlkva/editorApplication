@@ -40,19 +40,19 @@ def data(request):
 
     if request.method == 'PUT':
         try:
-            label = request.data["label"]
+            id = request.data["id"]
             new_label = request.data["new_label"]
             node_type = request.data["type"]
 
             if node_type == "OPK":
-                response = opk_put(label, new_label)
-                return JsonResponse(response, safe=False)
+                response = opk_put(id, new_label)
+                return JsonResponse({"tree": response}, safe=False)
             if node_type == "Descriptor":
-                response = descriptor_put(label, new_label)
-                return JsonResponse(response, safe=False)
-            if node_type == "SubDescriptor":
-                response = indicator_put(label, new_label)
-                return JsonResponse(response, safe=False)
+                response = descriptor_put(id, new_label)
+                return JsonResponse({"tree": response}, safe=False)
+            if node_type == "Indicator":
+                response = indicator_put(id, new_label)
+                return JsonResponse({"tree": response}, safe=False)
 
         except Exception as e:
             response = {"error": ["Error is ", str(e)]}
@@ -60,16 +60,15 @@ def data(request):
 
     if request.method == "DELETE":
         try:
-            label = request.data["label"]
+            uid = request.data["id"]
             node_type = request.data["type"]
 
             if node_type == "Descriptor":
-                response = descriptor_delete(label)
-                return JsonResponse(response, safe=False)
+                response = descriptor_delete(uid)
+                return JsonResponse({"deleted": response}, safe=False)
             if node_type == "Indicator":
-                response = indicator_delete(label)
-                print(response)
-                return JsonResponse(response, safe=False)
+                response = indicator_delete(uid)
+                return JsonResponse({"deleted": response}, safe=False)
 
         except Exception as e:
             response = {"error": ["Error is ", str(e)]}
@@ -79,18 +78,20 @@ def data(request):
     if request.method == "POST":
         try:
             node_type = request.data["type"]
-            parent_label = request.data["label"]
+            #parent_label = request.data["label"]
             new_label = request.data["new_label"]
 
             if node_type == "OPK":
                 response = opk_post(new_label)
-                return JsonResponse(response, status=status.HTTP_201_CREATED)
+                return JsonResponse({"tree": response}, status=status.HTTP_201_CREATED)
             if node_type == "Indicator":
-                response = indicator_post(parent_label, new_label)
-                return JsonResponse(response, status=status.HTTP_201_CREATED)
+                parent_id = request.data["id"]
+                response, relations = indicator_post(parent_id, new_label)
+                return JsonResponse({"tree": response, "relationShips": relations}, status=status.HTTP_201_CREATED)
             if node_type == "Descriptor":
-                response = descriptor_post(parent_label, new_label)
-                return JsonResponse(response, status=status.HTTP_201_CREATED)
+                parent_id = request.data["id"]
+                response, relations = descriptor_post(parent_id, new_label)
+                return JsonResponse({"tree": response, "relationShips": relations}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             response = {"error": ["Error is ", str(e)]}

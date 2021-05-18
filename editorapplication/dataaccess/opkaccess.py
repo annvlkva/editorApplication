@@ -22,6 +22,9 @@ def opk_put(uid, new_label):
     response = {
         "id": obj.uid,
         "label": obj.label,
+        "color": "#9fa8da",
+        "level": "1",
+        "type": "OPK",
     }
     return response
 
@@ -31,6 +34,10 @@ def opk_post(label):
         obj.save()
         response = {
             "id": obj.uid,
+            "label": obj.label,
+            "color": "#9fa8da",
+            "level": "1",
+            "node_type": "OPK",
         }
         return response
 

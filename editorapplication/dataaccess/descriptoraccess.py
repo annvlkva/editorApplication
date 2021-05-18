@@ -8,7 +8,7 @@ def descriptor_get():
 
     for var in desVar:
         obj = {
-            "id": var.id,
+            "id": var.uid,
             "label": var.label,
             "color": "#90caf9",
             "level": "3",
@@ -25,7 +25,7 @@ def descriptor_get():
 def getConnections(descriptor):
     try:
         response = []
-        d = Descriptor.nodes.get(uid=descriptor["uid"])
+        d = Descriptor.nodes.get(uid=descriptor["id"])
 
         for p in d.destoind:
             obj = {
@@ -50,6 +50,9 @@ def descriptor_put(uid, new_label):
         response = {
             "id": obj.uid,
             "label": obj.label,
+            "color": "#90caf9",
+            "level": "3",
+            "type": "Descriptor",
         }
         return response
     except:
@@ -59,31 +62,40 @@ def descriptor_delete(uid):
     try:
         obj = Descriptor.nodes.get(uid=uid)
         obj.delete()
-        response = {"success": "deleted"}
+        response = "deleted"
         return response
     except Exception as e:
-        return {"error": e}
+        return "error"
 
-def descriptor_post(parent_label, new_label):
+def descriptor_post(parent_id, new_label):
     try:
         obj = Descriptor(label=new_label)
         obj.save()
         response = {
-            "id": obj.uid
+            "id": obj.uid,
+            "label": obj.label,
+            "color": "#90caf9",
+            "level": "3",
+            "node_type": "Descriptor",
         }
-        c = postConnections(parent_label, obj.label)
+        c = postConnections(parent_id, obj.uid)
         if c != {"error": "error"}:
-            return response
+            return response, c
         return {"error": "error"}
     except Exception as e:
         return {"error": e}
 
-def postConnections(parent_label, new_label):
+def postConnections(parent_id, new_id):
     try:
-        obj1 = Indicator.nodes.get(label=parent_label)
-        obj2 = Descriptor.nodes.get(label=new_label)
-        res = obj2.destoind.connect(obj1)
-        response = {"result": res}
+        obj1 = Indicator.nodes.get(uid=parent_id)
+        obj2 = Descriptor.nodes.get(uid=new_id)
+        obj2.destoind.connect(obj1)
+        obj = {
+            "from": obj2.uid,
+            "to": obj1.uid,
+            "arrows": "from",
+        }
+        response = obj
 
         return response
     except:
