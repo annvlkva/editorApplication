@@ -1,47 +1,12 @@
-const host = '127.0.0.1'//'192.168.0.8'
-    //let myTable = document.getElementsByClassName("table table-striped")
-
-async function onPageLoaded(){
-    //let content = document.getElementById("content")
-
-
-    //content.innerHTML = "Loading... <img src=\"https://smallenvelop.com/wp-content/uploads/2014/08/Preloader_11.gif\">"
-    try {
-        let response = await fetch('http://' + host.toString() + ':8000/get_data')
-        let body = await response.json()
-        //content.innerHTML = ''
-
-        let tree = body['tree'].flat()
-
-        let parsedNodes = tree.map(function (e) {
-            return {"id": e['id'], "label": e['label'], "color": e['color'], "level": e['level'], "cyn": e['cyn'], "node_type": e["type"]}
-        })
-        let parsedRelationShips = body['relationShips'].flat().flat()
-
-        console.log(parsedNodes)
-        console.log(parsedRelationShips)
-
-        let data = tableData(parsedNodes, parsedRelationShips)
-        console.log("data:   ", data)
-
-        drawTable(data)
-
-        //console.log(tableData)
-
-
-    } catch
-        (e) {
-        content.innerHTML = "Error" + e
-    }
-}
-
-onPageLoaded()
-
-
+var grida
+/*
 function drawTable(data) {
     webix.ready(function () {
+        if (grida){
+            grida.destructor()
+        }
         grida = webix.ui({
-            container: "testA",
+            container: "mytable",
             id: "table",
             view: "treetable",
             columns: [
@@ -60,21 +25,19 @@ function drawTable(data) {
 
             on: {
                 onSelectChange: function () {
-                    console.log()
-                    var text = $$("table").getSelectedId(true).join();
-                    alert("Selected: " + text)
+                    //console.log()
+                    var id = $$("table").getSelectedId(true).join();
+                    alert("Selected: " + id)
                 }
             },
-
             data: data
         });
     });
-}
+}*/
 
 function tableData(nodes, edges){
     let data;
     data = [];
-
     for(let opk of nodes){
         if(opk["node_type"] === "OPK"){
             let ind_data;
