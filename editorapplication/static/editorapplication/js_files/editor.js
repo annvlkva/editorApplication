@@ -10,11 +10,8 @@ graphButton = document.getElementById("show_graph")
 const host = '127.0.0.1'//'192.168.0.8'  '192.168.1.179'//
 
 var parsedNodes = [], parsedRelationShips = []
-
 var chosenNode, nodeData, chosenNode_Type
-
 var grida
-
 var mode
 
 editButton.disabled = true
@@ -23,6 +20,197 @@ addButton.disabled = true
 tableButton.disabled = true
 graphButton.disabled = true
 
+function addFormLabel(){
+    switch (chosenNode_Type){
+        case "OPK":
+            return "  индиктор"
+        case "Indicator":
+            return "  дескриптор"
+        default:
+            return ""
+    }
+}
+
+function editFormLabel(){
+    switch (chosenNode_Type){
+        case "OPK":
+            return "  компетенцию"
+        case "Indicator":
+            return "  индикатор"
+        case "Descriptor":
+            return "  дескриптор"
+        default:
+            ""
+    }
+}
+
+var form_add = {
+    view:"form",
+    id: "addForm",
+    borderless:true,
+    elements: [
+        { view: "label", id:"form_add_label1", label: "Добавить"},
+        { view:"text", id:"form_add_label2", label:'Введите label', name:"new_label"},
+        //{ view:"text", label:'Email', name:"email" },
+        {margin:5, cols:[
+            { view:"button", value: "OK", align: "left", click:async function () {
+                let values = $$("addForm").getValues();
+                if (values["new_label"] != null && values["new_label"] !== ''){
+                        //if (this.getParentView().validate()) { //validate form
+                            //this.getTopParentView().close(); //hide window
+                    //var values = $$("addForm").getValues();
+                    let nodeType
+                    switch (chosenNode_Type) {
+                        case "OPK":
+                            nodeType = "Indicator"
+                            break
+                        case "Indicator":
+                            nodeType = "Descriptor"
+                            break
+                        default:
+                            nodeType = "OPK"
+                            break
+                    }
+
+                    let response = await addData('http://' + host.toString() + ':8000/get_data', {
+                        id: chosenNode, new_label: values["new_label"], type: nodeType
+                    })
+                    $$('win_add').hide();
+                    if (response.status !== 201) {
+                        alert(await response.text() + ' ' + response.status.toString())
+                        return
+                    }
+
+                    let body = await response.json()
+                    let newNode = body["tree"]
+
+                    parsedNodes.push(newNode)
+
+                    let newRelationShip = body["relationShips"]
+                    if (typeof (newRelationShip) != "undefined") {
+                        parsedRelationShips.push(newRelationShip)
+                        console.log(parsedRelationShips)
+                    }
+
+                    switch (mode) {
+                        case "Table":
+                            graphButton.removeEventListener('click', graphDrawOnClick)
+                            tableDraw()
+                            break;
+                        case "Graph":
+                            tableButton.removeEventListener('click', tableDrawOnClick)
+                            graphDraw()
+                            break
+                        default:
+                            content.innerHTML = "Error"
+                            break
+                    }
+                }
+                else{
+                    addEventListeners()
+                    alert("Empty!")
+                    $$('win_add').hide();
+                }}},
+            { view:"button", value: "Close", align: "right", click:function (){
+                addEventListeners()
+                $$('win_add').hide();
+            }}]
+        },
+    ],
+    rules:{
+        "new_label":webix.rules.isNotEmpty
+    },
+    elementsConfig:{
+        labelPosition:"top",
+    }
+};
+
+webix.ui({
+    view:"popup",
+    position: "center",
+    id:"win_add",
+    width:300,
+    head:false,
+    body:webix.copy(form_add)
+});
+
+var form_edit = {
+    view:"form",
+    id: "editForm",
+    borderless:true,
+    elements: [
+        { view: "label", id:"form_edit_label1", label: "Редактировать"},
+        { view:"text", id:"form_edit_label2", label:'Введите label', name:"new_label"},
+        //{ view:"text", label:'Email', name:"email" },
+        {margin:5, cols:[
+            { view:"button", value: "OK", align: "left", click:async function () {
+                let values = $$("editForm").getValues();
+                if (values["new_label"] != null && values["new_label"] !== '') {
+                    let response = await editData('http://' + host.toString() + ':8000/get_data', {
+                        id: chosenNode, new_label: values["new_label"], type: chosenNode_Type
+                    })
+                    if (response.status !== 200) {
+                        alert(await response.text() + ' ' + response.status.toString())
+                        return
+                    }
+                $$('win_edit').hide();
+                    let body = await response.json()
+                    //console.log(body.text)
+                    let editedNode = body["tree"]
+
+                    //console.log(editedNode)
+                    for (let entry of parsedNodes) {
+                        if (editedNode["id"] === entry["id"]) {
+                            entry["label"] = values["new_label"]
+                        }
+                    }
+                    switch (mode) {
+                        case "Table":
+                            graphButton.removeEventListener('click', graphDrawOnClick)
+                            tableDraw()
+                            break;
+                        case "Graph":
+                            tableButton.removeEventListener('click', tableDrawOnClick)
+                            graphDraw()
+                            break
+                        default:
+                            content.innerHTML = "Error"
+                            break
+                    }
+                }
+                else{
+                    addEventListeners()
+                    alert("Empty!")
+                    $$('win_edit').hide();
+                }}},
+            { view:"button", value: "Close", align: "right", click:function (){
+                addEventListeners()
+                $$('win_edit').hide();
+            }}]
+        },
+    ],
+    rules:{
+        "new_label":webix.rules.isNotEmpty
+    },
+    elementsConfig:{
+        labelPosition:"top",
+    }
+};
+
+webix.ui({
+    view:"popup",
+    position: "center",
+    id:"win_edit",
+    width:300,
+    head:false,
+    body:webix.copy(form_edit)
+});
+
+function showForm(winId, node){
+    $$(winId).getBody().clear();
+    $$(winId).show(node);
+    $$(winId).getBody().focus();
+}
 
 function addEventListeners() {
     editButton.addEventListener('click', editNodeOnClick)
@@ -57,46 +245,12 @@ async function editData(url = '', data = {}) {
 async function editNodeOnClick() {
     removeEventListeners()
 
-    let new_label = ''
-    new_label = prompt("Enter label: ")
-    if (new_label === '' || new_label == null) {
-        alert("Empty");
-        addEventListeners()
-    } else {
-        alert(new_label);
-        console.log(chosenNode_Type)
+    $$("form_edit_label1").define("label","Редактировать"+editFormLabel());
+    $$("form_edit_label1").refresh();
+    $$("form_edit_label2").define("label","Введите"+editFormLabel()+": ");
+    $$("form_edit_label2").refresh();
 
-        let response = await editData('http://' + host.toString() + ':8000/get_data', {
-            id: chosenNode, new_label: new_label, type: chosenNode_Type
-        })
-        if (response.status !== 200) {
-            alert(await response.text() + ' ' + response.status.toString())
-            return
-        }
-        let body = await response.json()
-        //console.log(body.text)
-        let editedNode = body["tree"]
-
-        console.log(editedNode)
-        for (let entry of parsedNodes) {
-            if (editedNode["id"] === entry["id"]) {
-                entry["label"] = new_label
-            }
-        }
-        switch (mode) {
-            case "Table":
-                graphButton.removeEventListener('click', graphDrawOnClick)
-                tableDraw()
-                break;
-            case "Graph":
-                tableButton.removeEventListener('click', tableDrawOnClick)
-                graphDraw()
-                break
-            default:
-                content.innerHTML = "Error"
-                break
-        }
-    }
+    showForm("win_edit")
 }
 
 async function deleteData(url = '', data = {}) {
@@ -186,65 +340,53 @@ async function addData(url = '', data = {}) {
 async function addNodeOnClick(){
     removeEventListeners()
 
-    new_label = ''
-    new_label = prompt("Enter label: ");
-    if (new_label === '' || new_label == null) {
-        alert("Empty");
-        addEventListeners()
-    } else {
-        alert(new_label);
+    $$("form_add_label1").define("label","Добавить"+addFormLabel());
+    $$("form_add_label1").refresh();
+    $$("form_add_label2").define("label","Введите"+addFormLabel()+": ");
+    $$("form_add_label2").refresh();
 
-        let nodeType
-        switch (chosenNode_Type) {
-            case "OPK":
-                nodeType = "Indicator"
-                break
-            case "Indicator":
-                nodeType = "Descriptor"
-                break
-            default:
-                nodeType = "OPK"
-                break
-        }
-
-        let response = await addData('http://' + host.toString() + ':8000/get_data', {
-            id: chosenNode, new_label: new_label, type: nodeType
-        })
-        if (response.status !== 201) {
-            alert(await response.text() + ' ' + response.status.toString())
-            return
-        }
-        let body = await response.json()
-        let newNode = body["tree"]
-
-        parsedNodes.push(newNode)
-
-        let newRelationShip = body["relationShips"]
-        if (typeof(newRelationShip) != "undefined"){
-            parsedRelationShips.push(newRelationShip)
-            console.log(parsedRelationShips)
-        }
-
-        switch (mode) {
-            case "Table":
-                graphButton.removeEventListener('click', graphDrawOnClick)
-                tableDraw()
-                break;
-            case "Graph":
-                tableButton.removeEventListener('click', tableDrawOnClick)
-                graphDraw()
-                break
-            default:
-                content.innerHTML = "Error"
-                break
-        }
-    }
+    showForm("win_add")
 }
 
 function nodesClick(){
-    editButton.disabled = false
+    /*editButton.disabled = false
     deleteButton.disabled = chosenNode_Type === "OPK";
-    addButton.disabled = chosenNode_Type === "Descriptor";
+    addButton.disabled = chosenNode_Type === "Descriptor";*/
+
+    switch (chosenNode_Type){
+        case "OPK":
+            editButton.disabled = false
+            addButton.disabled = false
+            deleteButton.disabled = true
+            editButton.setAttribute('title', "Редактировать компетенцию")
+            addButton.setAttribute('title', "Добавить индикатор")
+            deleteButton.removeAttribute('title')
+            break
+        case "Indicator":
+            editButton.disabled = false
+            addButton.disabled = false
+            deleteButton.disabled = false
+            editButton.setAttribute('title', "Редактировать индикатор")
+            addButton.setAttribute('title', "Добавить дескриптор")
+            deleteButton.setAttribute('title', "Удалить индикатор")
+            break
+        case "Descriptor":
+            editButton.disabled = false
+            addButton.disabled = true
+            deleteButton.disabled = false
+            editButton.setAttribute('title', "Редактировать дескриптор")
+            deleteButton.setAttribute('title', "Удалить дескритор")
+            addButton.removeAttribute('title')
+            break
+        default:
+            editButton.disabled = true
+            addButton.disabled = true
+            deleteButton.disabled = true
+            editButton.removeAttribute('title')
+            addButton.removeAttribute('title')
+            deleteButton.removeAttribute('title')
+            break
+    }
 }
 
 function tableDrawOnClick(){
@@ -391,9 +533,9 @@ function graphDraw() {
         //chosenNode_label = nodeData["label"]
         chosenNode_Type = nodeData["node_type"]
 
-        console.log("chosen node", chosenNode)
-        console.log("node data", nodeData)
-        console.log("node type",chosenNode_Type)
+        //console.log("chosen node", chosenNode)
+        //console.log("node data", nodeData)
+        //console.log("node type",chosenNode_Type)
 
         if (params.nodes.length !== 0) {
             nodesClick()
@@ -401,9 +543,11 @@ function graphDraw() {
             deleteButton.disabled = chosenNode_Type === "OPK";
             addButton.disabled = chosenNode_Type === "Descriptor";*/
         } else {
-            addButton.disabled = true
+            /*addButton.disabled = true
             deleteButton.disabled = true
-            editButton.disabled = true
+            editButton.disabled = true*/
+            chosenNode_Type = ""
+            nodesClick()
         }
     })
 }
@@ -413,7 +557,8 @@ async function onPageLoaded() {
     mynetwork.style.display = 'none'
     mytable.style.display = 'none'
     //let content = document.getElementById("content")
-    content.innerHTML = "Loading... <img src=\"https://smallenvelop.com/wp-content/uploads/2014/08/Preloader_11.gif\">"
+    content.innerHTML = "Загрузка... <img src = \"https://smallenvelop.com/wp-content/uploads/2014/08/Preloader_8.gif\">" //https://smallenvelop.com/wp-content/uploads/2014/08/Preloader_11.gif
+
     try {
         let response = await fetch('http://' + host.toString() + ':8000/get_data')
         let body = await response.json()
@@ -431,13 +576,24 @@ async function onPageLoaded() {
                     "node_type": e['type']
                 }
             })
-            console.log(parsedNodes)
+            //console.log(parsedNodes)
 
             parsedRelationShips = body['relationShips'].flat().flat()
-            console.log(parsedRelationShips)
+            //console.log(parsedRelationShips)
 
             mynetwork.style.display = 'inline-block'
             tableButton.disabled = false
+                /*"<table>" +
+                "<tr>" +
+                    "<td>" + "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"28\" height=\"28\" fill=\"currentColor\" class=\"bi bi-table\" viewBox=\"0 0 20 16\">\n" +
+                        "  <path d=\"M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z\"/>\n" +
+                        "</svg>" +
+                    "</td>" +
+                    "<td>" +
+                        "Добавить<br>компетенцию" +
+                    "</td>" +
+                "</tr>" + "</table>"
+        */
             graphDraw()
         }
         else{
