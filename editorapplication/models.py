@@ -3,6 +3,9 @@ from django.db import models
 # Create your models here.
 from neomodel import StructuredNode, StringProperty, RelationshipTo, UniqueIdProperty
 
+class Subject(StructuredNode):
+    uid = UniqueIdProperty()
+    label = StringProperty(index=True)
 
 class OPK(StructuredNode):
     uid = UniqueIdProperty()
@@ -13,6 +16,7 @@ class Indicator(StructuredNode):
     label = StringProperty(index=True)
     #Relations
     indtoopk = RelationshipTo(OPK, 'sub_of')
+    indtosubj = RelationshipTo(Subject, 'sub_of')
 
 class Descriptor(StructuredNode):
     uid = UniqueIdProperty()
