@@ -1,4 +1,4 @@
-from editorapplication.models import Indicator, OPK
+from editorapplication.models import Indicator, OPK, Subject
 
 def indicator_get():
     indVar = Indicator.nodes.all()
@@ -10,7 +10,7 @@ def indicator_get():
             "id": var.uid,
             "label": var.label,
             "color": "#b2fef7",
-            "level": "2",
+            "level": "3",
             "type": "Indicator",
         }
 
@@ -21,12 +21,18 @@ def indicator_get():
         response.append(obj)
     return response, connections
 
-
 def getConnections(indicator):
     try:
         response = []
         i = Indicator.nodes.get(uid=indicator["id"])
         for parent in i.indtoopk:
+            obj = {
+                "from": indicator["id"],
+                "to": parent.uid,
+                "arrows": "from",
+            }
+            response.append(obj)
+        for parent in i.indtosubj:
             obj = {
                 "from": indicator["id"],
                 "to": parent.uid,
@@ -47,7 +53,7 @@ def indicator_put(uid, new_label):
         "id": obj.uid,
         "label": obj.label,
         "color": "#b2fef7",
-        "level": "2",
+        "level": "3",
         "type": "Indicator",
     }
     return response
@@ -69,7 +75,7 @@ def indicator_post(parent_id, new_label):
             "id": obj.uid,
             "label": obj.label,
             "color": "#b2fef7",
-            "level": "2",
+            "level": "3",
             "node_type": "Indicator",
         }
         c = postConnections(parent_id, obj.uid)
@@ -85,6 +91,21 @@ def postConnections(parent_id, new_id):
         obj1 = OPK.nodes.get(uid=parent_id)
         obj2 = Indicator.nodes.get(uid=new_id)
         obj2.indtoopk.connect(obj1)
+        obj = {
+            "from": obj2.uid,
+            "to": obj1.uid,
+            "arrows": "from",
+        }
+        return obj
+    except:
+        return {"error": "error"}
+
+
+def indtosubjPost(parent_id, new_id):
+    try:
+        obj1 = Subject.nodes.get(uid=parent_id)
+        obj2 = Indicator.nodes.get(uid=new_id)
+        obj2.indtosubj.connect(obj1)
         obj = {
             "from": obj2.uid,
             "to": obj1.uid,

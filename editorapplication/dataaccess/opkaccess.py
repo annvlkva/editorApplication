@@ -9,7 +9,7 @@ def opk_get():
             "id": var.uid,
             "label": var.label,
             "color": "#9fa8da",
-            "level": "1",
+            "level": "2",
             "type": "OPK",
         }
         response.append(obj)
@@ -23,7 +23,7 @@ def opk_put(uid, new_label):
         "id": obj.uid,
         "label": obj.label,
         "color": "#9fa8da",
-        "level": "1",
+        "level": "2",
         "type": "OPK",
     }
     return response
@@ -36,7 +36,7 @@ def opk_post(label):
             "id": obj.uid,
             "label": obj.label,
             "color": "#9fa8da",
-            "level": "1",
+            "level": "2",
             "node_type": "OPK",
         }
         return response
@@ -44,3 +44,11 @@ def opk_post(label):
     except Exception as e:
         return {"error": e}
 
+def opk_delete(uid):
+    try:
+        obj = OPK.nodes.get(uid=uid)
+        obj.delete()
+        response = "deleted"
+        return response
+    except:
+        return "error"

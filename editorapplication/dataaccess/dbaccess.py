@@ -4,8 +4,10 @@ from rest_framework import status
 
 from editorapplication.dataaccess.descriptoraccess import descriptor_get, descriptor_put, descriptor_delete, \
     descriptor_post
-from editorapplication.dataaccess.opkaccess import opk_get, opk_put, opk_post
-from editorapplication.dataaccess.indicatoraccess import indicator_get, indicator_put, indicator_delete, indicator_post
+from editorapplication.dataaccess.opkaccess import opk_get, opk_put, opk_post, opk_delete
+from editorapplication.dataaccess.indicatoraccess import indicator_get, indicator_put, indicator_delete, indicator_post, \
+    indtosubjPost
+from editorapplication.dataaccess.subjectaccess import subject_post, subject_get, subject_put, subject_delete
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
@@ -14,8 +16,11 @@ def data(request):
         try:
             response = []
             relationShips = []
+            subjects = subject_get()
+            if subjects:
+                response.append(subjects)
             obj = opk_get()
-            if (obj):
+            if obj:
                 response.append(obj)
                 indicators, connections = indicator_get()
                 if indicators:
@@ -27,6 +32,7 @@ def data(request):
                     response.append(descriptors)
                     if connections:
                         relationShips.append(connections)
+
             else:
                 return JsonResponse({"nodes": "empty"}, safe=False)
 
@@ -53,6 +59,9 @@ def data(request):
             if node_type == "Indicator":
                 response = indicator_put(id, new_label)
                 return JsonResponse({"tree": response}, safe=False)
+            if node_type == "Subject":
+                response = subject_put(id, new_label)
+                return JsonResponse({"tree": response}, safe=False)
 
         except Exception as e:
             response = {"error": ["Error is ", str(e)]}
@@ -68,6 +77,12 @@ def data(request):
                 return JsonResponse({"deleted": response}, safe=False)
             if node_type == "Indicator":
                 response = indicator_delete(uid)
+                return JsonResponse({"deleted": response}, safe=False)
+            if node_type == "Subject":
+                response = subject_delete(uid)
+                return JsonResponse({"deleted": response}, safe=False)
+            if node_type == "OPK":
+                response = opk_delete(uid)
                 return JsonResponse({"deleted": response}, safe=False)
 
         except Exception as e:
@@ -92,16 +107,15 @@ def data(request):
                 parent_id = request.data["id"]
                 response, relations = descriptor_post(parent_id, new_label)
                 return JsonResponse({"tree": response, "relationShips": relations}, status=status.HTTP_201_CREATED)
+            if node_type == "Subject":
+                response = subject_post(new_label)
+                return JsonResponse({"tree": response}, status=status.HTTP_201_CREATED)
+            if node_type == "indicatorToSubject":
+                parent_id = request.data["id"]
+                response = indtosubjPost(parent_id, new_label)
+                return JsonResponse({"relationShips": response}, status=status.HTTP_201_CREATED)
+
 
         except Exception as e:
             response = {"error": ["Error is ", str(e)]}
             return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR, safe=False)
-
-
-
-
-
-
-
-
-

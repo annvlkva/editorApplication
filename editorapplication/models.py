@@ -1,6 +1,3 @@
-from django.db import models
-
-# Create your models here.
 from neomodel import StructuredNode, StringProperty, RelationshipTo, UniqueIdProperty
 
 class Subject(StructuredNode):

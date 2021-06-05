@@ -1,6 +1,5 @@
 from editorapplication.models import Descriptor, OPK, Indicator
 
-
 def descriptor_get():
     desVar = Descriptor.nodes.all()
     response = []
@@ -11,7 +10,7 @@ def descriptor_get():
             "id": var.uid,
             "label": var.label,
             "color": "#90caf9",
-            "level": "3",
+            "level": "4",
             "type": "Descriptor",
         }
         response.append(obj)
@@ -51,7 +50,7 @@ def descriptor_put(uid, new_label):
             "id": obj.uid,
             "label": obj.label,
             "color": "#90caf9",
-            "level": "3",
+            "level": "4",
             "type": "Descriptor",
         }
         return response
@@ -75,7 +74,7 @@ def descriptor_post(parent_id, new_label):
             "id": obj.uid,
             "label": obj.label,
             "color": "#90caf9",
-            "level": "3",
+            "level": "4",
             "node_type": "Descriptor",
         }
         c = postConnections(parent_id, obj.uid)

@@ -8,8 +8,8 @@ def subject_get():
         obj = {
             "id": var.uid,
             "label": var.label,
-            #"color": "#9fa8da",
-            #"level": "1",
+            "color": "#9fa8da",
+            "level": "1",
             "type": "Subject",
         }
         response.append(obj)
@@ -22,8 +22,8 @@ def subject_put(uid, new_label):
     response = {
         "id": obj.uid,
         "label": obj.label,
-        #"color": "#9fa8da",
-        #"level": "1",
+        "color": "#9fa8da",
+        "level": "1",
         "type": "Subject",
     }
     return response
@@ -35,8 +35,8 @@ def subject_post(label):
         response = {
             "id": obj.uid,
             "label": obj.label,
-            #"color": "#9fa8da",
-            #"level": "1",
+            "color": "#9fa8da",
+            "level": "1",
             "node_type": "Subject",
         }
         return response
@@ -44,3 +44,11 @@ def subject_post(label):
     except Exception as e:
         return {"error": e}
 
+def subject_delete(uid):
+    try:
+        obj = Subject.nodes.get(uid=uid)
+        obj.delete()
+        response = "deleted"
+        return response
+    except:
+        return "error"
