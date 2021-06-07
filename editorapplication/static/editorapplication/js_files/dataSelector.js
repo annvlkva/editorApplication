@@ -10,7 +10,7 @@ function get_descriptors(nodes, edges, ind){
                         "id": des["id"],
                         "label": des["label"],
                         "open": "true",
-                        $css:{ "background-color": "#b2fef7" },
+                        $css:{"background-color": "#f7f2e0" },
                         "node_type": des["node_type"]
                     })
                 }
@@ -52,7 +52,7 @@ function get_opk_indicators(nodes, edges, opk){
                         "label": ind["label"],
                         "node_type": ind["node_type"],
                         "open": "true",
-                        $css:{ "background-color": "#90caf9" },
+                        $css:{ "background-color": "#ecf8e0" },
                         "data": get_descriptors(nodes, edges, ind)//des_data
                     })
                 }
@@ -73,7 +73,7 @@ function tableData(nodes, edges, opk_id){
                 "label": opk["label"],
                 "node_type": opk["node_type"],
                 "open": "true",
-                $css:{ "background-color": "#9fa8da" },
+                $css:{ "background-color": "#e0f8f1" },
                 "data": get_opk_indicators(nodes, edges, opk)
             })
         }
@@ -129,7 +129,7 @@ function get_subject_indicators(nodes, edges, subj, id){
                         "label": ind["label"],
                         "node_type": ind["node_type"],
                         "open": "true",
-                        $css:{ "background-color": "#90caf9" },
+                        $css:{ "background-color": "#ecf8e0" },
                     })
                 }
             }
@@ -153,7 +153,7 @@ function mainTableData(nodes, edges){
                 "label": subj["label"],
                 "node_type": subj["node_type"],
                 "open": "true",
-                $css: {"background-color": "#9fa8da"},
+                $css:{"background-color": "#e0ecf8"},
                 "data": ind_data["data"]
             })
             id = ind_data["id"]
@@ -197,7 +197,7 @@ function getIndicatorList(nodes){
         if(ind["node_type"] === "Indicator") {
             data.push({
                 "id": ind["id"],
-                "value": ind["label"]
+                "value": ind["label"],
             })
         }
     }
@@ -212,7 +212,7 @@ function getOPKList(nodes){
         if(opk["node_type"] === "OPK"){
             data.push({
                 "id": opk["id"],
-                "value": opk["label"]
+                "value": opk["label"],
             })
         }
     }

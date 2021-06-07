@@ -6,7 +6,7 @@ from editorapplication.dataaccess.descriptoraccess import descriptor_get, descri
     descriptor_post
 from editorapplication.dataaccess.opkaccess import opk_get, opk_put, opk_post, opk_delete
 from editorapplication.dataaccess.indicatoraccess import indicator_get, indicator_put, indicator_delete, indicator_post, \
-    indtosubjPost
+    indtosubjPost, indtosubj_delete
 from editorapplication.dataaccess.subjectaccess import subject_post, subject_get, subject_put, subject_delete
 
 
@@ -83,6 +83,10 @@ def data(request):
                 return JsonResponse({"deleted": response}, safe=False)
             if node_type == "OPK":
                 response = opk_delete(uid)
+                return JsonResponse({"deleted": response}, safe=False)
+            if node_type == "indtosubj":
+                parent_id = request.data["parent_id"]
+                response = indtosubj_delete(uid, parent_id)
                 return JsonResponse({"deleted": response}, safe=False)
 
         except Exception as e:

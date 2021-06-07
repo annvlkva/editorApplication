@@ -41,7 +41,7 @@ backButton.hidden = true
 //Объявление глобальных переменных
 const host = '127.0.0.1'
 var parsedNodes = [], parsedRelationShips = []
-var chosenNode, nodeData, chosenNode_Type
+var chosenNode, nodeData, chosenNode_Type, parent_node
 var grida
 var mode, part, graphId
 var indicatorList = [], opkList = [], helpData = []
@@ -50,7 +50,6 @@ var indicatorList = [], opkList = [], helpData = []
 var showHelp = {
     view:"form",
     id:"help",
-
     elements: [
         {
             view: "tree",
@@ -66,7 +65,7 @@ webix.ui({
     position: "center",
     id:"win_help",
     width:500,
-    height:300,
+    height:400,
     head:{
         view:"toolbar", margin:-4, cols:[
             {view:"label", label: "Help" },
@@ -85,7 +84,7 @@ var form_create_opk = {
     borderless:true,
     elements: [
         {view: "label", label: "Новая компетенция"},
-        {view:"text", id:"opkText", label:'Введите компетенцию ', name:"new_label", labelPosition: "top"},
+        {view:"textarea", id:"opkText", label:'Введите компетенцию ', name:"new_label", labelPosition: "top"},
         { view:"button", value: "OK", align: "right", click:async function () {
 
                 let nodeType = "OPK"
@@ -109,25 +108,29 @@ var form_create_opk = {
                     $$("opkCombo").define("options",opkList);
                     $$("opkCombo").refresh();
                     $$('win_create_opk').hide();
+                    $$('win_create_indicator').show();
                 }
                 else{
                     alert("Empty!")
                     $$('win_create_opk').hide();
+                    $$('win_create_indicator').show();
                 }
             }
         },
         { view:"button", value: "Close", align: "right", click:function (){
                 $$('win_create_opk').hide();
+                $$('win_create_indicator').show();
             }
         }
     ]
 }
 
 webix.ui({
-    view:"popup",
+    view:"window",
     position: "center",
     id:"win_create_opk",
     width:300,
+    height: 300,
     head:false,
     body:webix.copy(form_create_opk)
 });
@@ -139,8 +142,8 @@ var form_create_indicator = {
     borderless:true,
     elements: [
         {view: "label", label: "Новый индикатор"},
-        {view:"text", id:"indicatorText", label:'Введите индикатор ', name:"new_label", labelPosition: "top"},
-        {view:"combo", id:"opkCombo", label:"Выберите компетенцию", labelPosition:"top",
+        {view:"textarea", id:"indicatorText", label:'Введите индикатор ', name:"new_label", labelPosition: "top"},
+        {view:"select", id:"opkCombo", label:"Выберите компетенцию", labelPosition:"top",
             options:opkList,
         },
         { view:"button", value: "OK", align: "right", click:async function () {
@@ -178,29 +181,33 @@ var form_create_indicator = {
                     $$("indicatorCombo").define("options",indicatorList);
                     $$("indicatorCombo").refresh();
                     $$('win_create_indicator').hide();
+                    $$('win_indicator_add').show()
                 }
                 else{
                     alert("Empty!")
-                    $$('win_create_indicator').hide();
+                    $$('win_create_indicator').show();
                 }
             }
         },
         { view:"button", value: "Новая компетенция", align: "right", click:function (){
+            $$('win_create_indicator').hide();
                 showForm("win_create_opk")
             }
         },
         { view:"button", value: "Close", align: "right", click:function (){
                 $$('win_create_indicator').hide();
+                $$('win_indicator_add').show()
             }
         }
     ]
 }
 
 webix.ui({
-    view:"popup",
+    view:"window",
     position: "center",
     id:"win_create_indicator",
     width:300,
+    height: 400,
     head:false,
     body:webix.copy(form_create_indicator)
 });
@@ -212,7 +219,7 @@ var form_indicator_add = {
     borderless: true,
     elements: [
         {view: "label", label: "Добавить индикатор"},
-        {view:"combo", id:"indicatorCombo", label:"Выберите индикатор", labelPosition:"top",
+        {view:"select", id:"indicatorCombo", label:"Выберите индикатор", labelPosition:"top",
             options:indicatorList,
         },
             { view:"button", value: "OK", align: "left", click:async function () {
@@ -248,11 +255,13 @@ var form_indicator_add = {
                     opkList = getOPKList(parsedNodes)
                     $$("opkCombo").define("options",opkList);
                     $$("opkCombo").refresh();
+                    $$('win_indicator_add').hide()
                     showForm("win_create_indicator")
             }},
 
             { view:"button", value: "Close", align: "right", click:function (){
                 $$('win_indicator_add').hide();
+
             }
         },
     ],
@@ -263,7 +272,7 @@ webix.ui({
     position: "center",
     id:"win_indicator_add",
     width:300,
-    height:400,
+    height:350,
     head:false,
     body:webix.copy(form_indicator_add)
 });
@@ -275,7 +284,7 @@ var form_add = {
     borderless:true,
     elements: [
         { view: "label", id:"form_add_label1", label: "Добавить новый элемент"},
-        { view:"text", id:"form_add_label2", label:'Введите название элемента ', name:"new_label"},
+        { view:"textarea", id:"form_add_label2", label:'Введите название элемента ', name:"new_label"},
         {margin:5, cols:[
             { view:"button", value: "OK", align: "left", click:async function () {
                 let values = $$("addForm").getValues();
@@ -338,10 +347,11 @@ var form_add = {
 };
 
 webix.ui({
-    view:"popup",
+    view:"window",
     position: "center",
     id:"win_add",
     width:300,
+    height:300,
     head:false,
     body:webix.copy(form_add)
 });
@@ -402,10 +412,11 @@ var form_subject_add = {
 };
 
 webix.ui({
-    view:"popup",
+    view:"window",
     position: "center",
     id:"win_subject_add",
     width:300,
+    height:400,
     head:false,
     body:webix.copy(form_subject_add)
 });
@@ -417,7 +428,7 @@ var form_edit = {
     borderless:true,
     elements: [
         { view: "label", id:"form_edit_label1", label: "Редактировать узел дерева"},
-        { view:"text", id:"form_edit_label2", label:'Введите имя узла дерева', name:"new_label"},
+        { view:"textarea", id:"form_edit_label2", label:'Введите имя узла дерева', name:"new_label"},
         //{ view:"text", label:'Email', name:"email" },
         {margin:5, cols:[
             { view:"button", value: "OK", align: "left", click:async function () {
@@ -462,10 +473,11 @@ var form_edit = {
 };
 
 webix.ui({
-    view:"popup",
+    view:"window",
     position: "center",
     id:"win_edit",
     width:300,
+    height:300,
     head:false,
     body:webix.copy(form_edit)
 });
@@ -508,54 +520,69 @@ async function editNodeOnClick() {
 
 //Запрос на удаление данных
 async function deleteData(url = '', data = {}) {
-    // Default options are marked with *
     const response = await fetch(url, {
-        method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
+        method: 'DELETE',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json'
-            // 'Content-Type': 'application/x-www-form-urlencoded',
         },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *client
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify(data)
     });
-    return response; // parses JSON response into native JavaScript objects
+    return response;
 }
 
 //Обработка нажатия кнопки "Удалить"
 async function deleteNodeOnClick(){
-    let response = await deleteData('http://' + host.toString() + ':8000/get_data', {
-        id: chosenNode, type: chosenNode_Type
-    })
-    if (response.status !== 200) {
-        alert(await response.text() + ' ' + response.status.toString())
-        return
-    }
+    if(mode === "Table" && part === "Main"){
+        let response = await deleteData('http://' + host.toString() + ':8000/get_data', {
+            id: chosenNode, parent_id: parent_node, type: chosenNode_Type
+        })
+        if (response.status !== 200) {
+            alert(await response.text() + ' ' + response.status.toString())
+            return
+        }
 
-    let body = await response.json()
-    console.log("chosen node", chosenNode)
-    console.log(body["deleted"].text)
-    if(body["deleted"] === "deleted"){
-        console.log("id", chosenNode)
-        for (i in parsedRelationShips){
-            console.log("i", i)
-            if(chosenNode === parsedRelationShips[i]["from"]){
-                parsedRelationShips.splice(i, 1)
-                console.log("deleted", i)
+        let body = await response.json()
+        if(body["deleted"] === "deleted"){
+            for (i in parsedRelationShips){
+                if(chosenNode === parsedRelationShips[i]["from"] && parent_node === parsedRelationShips[i]["to"]){
+                    parsedRelationShips.splice(i, 1)
+                }
             }
         }
-        console.log("relations", parsedRelationShips)
-        for (i in parsedNodes) {
-            console.log("i", i)
-            if (chosenNode === parsedNodes[i]["id"]) {
-                parsedNodes.splice(i, 1)
-                console.log("deleted", i)
+    }
+    else{
+        let response = await deleteData('http://' + host.toString() + ':8000/get_data', {
+            id: chosenNode, type: chosenNode_Type
+        })
+        if (response.status !== 200) {
+            alert(await response.text() + ' ' + response.status.toString())
+            return
+        }
+
+        let body = await response.json()
+        console.log("chosen node", chosenNode)
+        console.log(body["deleted"].text)
+        if(body["deleted"] === "deleted"){
+            console.log("id", chosenNode)
+            for (i in parsedRelationShips){
+                console.log("i", i)
+                if(chosenNode === parsedRelationShips[i]["from"]){
+                    parsedRelationShips.splice(i, 1)
+                }
+            }
+            console.log("relations", parsedRelationShips)
+            for (i in parsedNodes) {
+                console.log("i", i)
+                if (chosenNode === parsedNodes[i]["id"]) {
+                    parsedNodes.splice(i, 1)
+                }
             }
         }
-        console.log("nodes", parsedNodes)
     }
     chooseMode()
 }
@@ -638,10 +665,8 @@ function nodesClick(){
         }
     }
     if(part === "Main"){
-        console.log("here")
         switch (chosenNode_Type){
-            case "Indicator":
-                console.log("here")
+            case "indtosubj":
                 addSubjectButton.disabled = false
                 addIndicatorButton.disabled = true
                 editButton.disabled = false
@@ -668,6 +693,7 @@ function nodesClick(){
                 addIndicatorButton.disabled = true
                 editButton.disabled = true
                 deleteButton.disabled = true
+                watchButton.disabled = true
                 addSubjectButton.removeAttribute('title')
                 addIndicatorButton.removeAttribute('title')
                 editButton.removeAttribute('title')
@@ -691,6 +717,7 @@ function chooseMode(){
     }
 }
 
+//Функция для отображения графа со всеми элементами
 function showAllOnClicked(){
     addButton.hidden = true
     deleteButton.hidden = true
@@ -763,6 +790,7 @@ function showAllOnClicked(){
     network = new vis.Network(mynetwork, data, options);
 }
 
+//Функция для завершения режима просмотра всего графа
 function hideAllOnClicked(){
     hideAllButton.hidden = true
     showAllButton.hidden = false
@@ -858,7 +886,10 @@ function tableDraw() {
 
                         chosenNode_Type = record.node_type
                         nodesClick()
-                    }
+                    },
+                    "onresize":webix.once(function(){
+                    this.adjustRowHeight(null, true)
+                })
                 },
                 data: table_data
             });
@@ -995,14 +1026,10 @@ function graphDraw() {
 
 //Функция для отображения графа дисциплин
 function mainTableDraw(){
-    //mode = "Table"
-    //addButton.disabled = true
     deleteButton.disabled = true
     editButton.disabled = true
 
     let table_data = mainTableData(parsedNodes, parsedRelationShips)
-
-    console.log("table", table_data)
 
     webix.ready(function (message) {
         if (grida){
@@ -1016,25 +1043,37 @@ function mainTableDraw(){
                 {
                     id: "label", header: "Label", width: 350,
                     template: "{common.space()}{common.icon()} #label#",
-                    fillspace:1
+                    fillspace:1,
+
                 },
                 {id: "node_type", header: "Type", width: 250}
             ],
+
             select: "row",
             autoheight: false,
             autowidth: true,
+            fixedRowHeight:false,
 
             on: {
                 onSelectChange: function () {
-                    //console.log()
                     chosen_id = $$("table").getSelectedId(true).join();
                     var record = $$("table").getItem(chosen_id)
                     chosenNode = record.node_id
                     chosenNode_Type = record.node_type
-                    console.log(chosenNode, chosenNode_Type)
+                    if(chosenNode_Type === "Indicator") {
+                        var parent = grida.getParentId(chosen_id)
+                        var parent_record = $$("table").getItem(parent)
+                        parent_node = parent_record.node_id
+                        chosenNode_Type = "indtosubj"
+                        console.log("ID", chosenNode, "parent", parent_node)
+                    }
                     nodesClick()
-                }
+                },
+                "onresize":webix.once(function(){
+                    this.adjustRowHeight(null, true)
+                })
             },
+
             data: table_data
         });
     });

@@ -8,7 +8,7 @@ def subject_get():
         obj = {
             "id": var.uid,
             "label": var.label,
-            "color": "#9fa8da",
+            "color": "#e0ecf8",
             "level": "1",
             "type": "Subject",
         }
@@ -22,7 +22,7 @@ def subject_put(uid, new_label):
     response = {
         "id": obj.uid,
         "label": obj.label,
-        "color": "#9fa8da",
+        "color": "#e0ecf8",
         "level": "1",
         "type": "Subject",
     }
@@ -35,7 +35,7 @@ def subject_post(label):
         response = {
             "id": obj.uid,
             "label": obj.label,
-            "color": "#9fa8da",
+            "color": "#e0ecf8",
             "level": "1",
             "node_type": "Subject",
         }

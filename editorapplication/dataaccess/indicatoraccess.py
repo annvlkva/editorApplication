@@ -9,7 +9,7 @@ def indicator_get():
         obj = {
             "id": var.uid,
             "label": var.label,
-            "color": "#b2fef7",
+            "color": "#ecf8e0",
             "level": "3",
             "type": "Indicator",
         }
@@ -52,7 +52,7 @@ def indicator_put(uid, new_label):
     response = {
         "id": obj.uid,
         "label": obj.label,
-        "color": "#b2fef7",
+        "color": "#ecf8e0",
         "level": "3",
         "type": "Indicator",
     }
@@ -67,6 +67,16 @@ def indicator_delete(uid):
     except:
         return "error"
 
+def indtosubj_delete(uid, parent_id):
+    try:
+        obj1 = Subject.nodes.get(uid=parent_id)
+        obj2 = Indicator.nodes.get(uid=uid)
+        obj2.indtosubj.disconnect(obj1)
+        response = "deleted"
+        return response
+    except:
+        return {"error": "error"}
+
 def indicator_post(parent_id, new_label):
     try:
         obj = Indicator(label=new_label)
@@ -74,7 +84,7 @@ def indicator_post(parent_id, new_label):
         response = {
             "id": obj.uid,
             "label": obj.label,
-            "color": "#b2fef7",
+            "color": "#ecf8e0",
             "level": "3",
             "node_type": "Indicator",
         }

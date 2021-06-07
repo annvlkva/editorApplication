@@ -8,7 +8,7 @@ def opk_get():
         obj = {
             "id": var.uid,
             "label": var.label,
-            "color": "#9fa8da",
+            "color": "#e0f8f1",
             "level": "2",
             "type": "OPK",
         }
@@ -22,7 +22,7 @@ def opk_put(uid, new_label):
     response = {
         "id": obj.uid,
         "label": obj.label,
-        "color": "#9fa8da",
+        "color": "#e0f8f1",
         "level": "2",
         "type": "OPK",
     }
@@ -35,7 +35,7 @@ def opk_post(label):
         response = {
             "id": obj.uid,
             "label": obj.label,
-            "color": "#9fa8da",
+            "color": "#e0f8f1",
             "level": "2",
             "node_type": "OPK",
         }

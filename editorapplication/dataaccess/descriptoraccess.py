@@ -9,7 +9,7 @@ def descriptor_get():
         obj = {
             "id": var.uid,
             "label": var.label,
-            "color": "#90caf9",
+            "color": "#f7f2e0",
             "level": "4",
             "type": "Descriptor",
         }
@@ -49,7 +49,7 @@ def descriptor_put(uid, new_label):
         response = {
             "id": obj.uid,
             "label": obj.label,
-            "color": "#90caf9",
+            "color": "#f7f2e0",
             "level": "4",
             "type": "Descriptor",
         }
@@ -73,7 +73,7 @@ def descriptor_post(parent_id, new_label):
         response = {
             "id": obj.uid,
             "label": obj.label,
-            "color": "#90caf9",
+            "color": "#f7f2e0",
             "level": "4",
             "node_type": "Descriptor",
         }
