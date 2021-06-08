@@ -46,7 +46,7 @@ var grida
 var mode, part, graphId
 var indicatorList = [], opkList = [], helpData = []
 
-//Окно для отображения инструкции пользования приложением
+//Форма для отображения инструкции пользования приложением
 var showHelp = {
     view:"form",
     id:"help",
@@ -59,6 +59,7 @@ var showHelp = {
         }
     ]
 }
+
 
 webix.ui({
     view:"window", move:true,
@@ -537,9 +538,9 @@ async function deleteData(url = '', data = {}) {
 
 //Обработка нажатия кнопки "Удалить"
 async function deleteNodeOnClick(){
-    if(mode === "Table" && part === "Main"){
+    if(mode === "Table" && part === "Main" && chosenNode_Type === "Indicator"){
         let response = await deleteData('http://' + host.toString() + ':8000/get_data', {
-            id: chosenNode, parent_id: parent_node, type: chosenNode_Type
+            id: chosenNode, parent_id: parent_node, type: "indtosubj"
         })
         if (response.status !== 200) {
             alert(await response.text() + ' ' + response.status.toString())
@@ -666,7 +667,7 @@ function nodesClick(){
     }
     if(part === "Main"){
         switch (chosenNode_Type){
-            case "indtosubj":
+            case "Indicator":
                 addSubjectButton.disabled = false
                 addIndicatorButton.disabled = true
                 editButton.disabled = false
@@ -1064,7 +1065,6 @@ function mainTableDraw(){
                         var parent = grida.getParentId(chosen_id)
                         var parent_record = $$("table").getItem(parent)
                         parent_node = parent_record.node_id
-                        chosenNode_Type = "indtosubj"
                         console.log("ID", chosenNode, "parent", parent_node)
                     }
                     nodesClick()
