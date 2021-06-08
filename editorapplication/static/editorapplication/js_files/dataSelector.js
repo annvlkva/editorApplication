@@ -1,20 +1,20 @@
 //Функция для получения дескрипторов связанных с индикатором
-function get_descriptors(nodes, edges, ind){
-    let des_data;
-    des_data = [];
-    for(let des of nodes){
-        if(des["node_type"] === "Descriptor"){
-            for (let des_edge of edges){
-                if(des_edge["from"] === des["id"] && des_edge["to"] === ind["id"]){
-                    des_data.push({
-                        "id": des["id"],
-                        "label": des["label"],
-                        "open": "true",
-                        $css:{"background-color": "#f7f2e0" },
-                        "node_type": des["node_type"]
-                    })
-                }
-            }
+function get_descriptors(nodes, edges, ind) {
+    let des_data
+    des_data = []
+    let des_nodes = nodes.filter(n => n["node_type"] === "Descriptor")
+    for(let des of des_nodes){
+        let des_edge = edges.find(function (element){
+            return element["from"] === des["id"] && element["to"] === ind["id"]
+        })
+        if(des_edge){
+            des_data.push({
+                "id": des["id"],
+                "label": des["label"],
+                "open": "true",
+                $css:{"background-color": "#f7f2e0" },
+                "node_type": des["node_type"]
+            })
         }
     }
     return des_data
@@ -22,41 +22,36 @@ function get_descriptors(nodes, edges, ind){
 
 //Получить id компетенции по индикатору
 function getOPKId(nodes, edges, graphId){
-    for(let ind of nodes){
-        if(ind["id"] === graphId){
-            for(let edge of edges){
-                if(edge["from"] === ind["id"]){
-                    let tmpId = edge["to"]
-                    for(let n of nodes){
-                        if(n["id"] === tmpId && n["node_type"] === "OPK"){
-                            return n
-                        }
-                    }
-                }
-            }
+    let edge = edges.filter(e => e["from"] === graphId)
+    for (let e of edge) {
+        let node = nodes.find(function (element) {
+            return element["id"] === e["to"] && element["node_type"] === "OPK"
+        })
+        if(node !== "undefined"){
+            return node
         }
     }
-    return n
+    return false
 }
 
 //Функция для получения индикаторов связанных с компетенцией
 function get_opk_indicators(nodes, edges, opk){
     let ind_data;
     ind_data = [];
-    for(let ind of nodes){
-        if(ind["node_type"] === "Indicator"){
-            for(let ind_edge of edges){
-                if(ind_edge["from"] === ind["id"] && ind_edge["to"] === opk["id"]){
-                    ind_data.push({
-                        "id": ind["id"],
-                        "label": ind["label"],
-                        "node_type": ind["node_type"],
-                        "open": "true",
-                        $css:{ "background-color": "#ecf8e0" },
-                        "data": get_descriptors(nodes, edges, ind)//des_data
-                    })
-                }
-            }
+    let ind_nodes = nodes.filter(n => n["node_type"] === "Indicator")
+    for(let ind of ind_nodes){
+        let ind_edge = edges.find(function (element){
+            return element["from"] === ind["id"] && element["to"] === opk["id"]
+        })
+        if(ind_edge){
+            ind_data.push({
+                "id": ind["id"],
+                "label": ind["label"],
+                "open": "true",
+                $css:{"background-color": "#ecf8e0" },
+                "node_type": ind["node_type"],
+                "data": get_descriptors(nodes, edges, ind)
+            })
         }
     }
     return ind_data
@@ -66,17 +61,18 @@ function get_opk_indicators(nodes, edges, opk){
 function tableData(nodes, edges, opk_id){
     let data;
     data = [];
-    for(let opk of nodes){
-        if(opk["node_type"] === "OPK" && opk["id"] === opk_id){
-            data.push({
-                "id": opk["id"],
-                "label": opk["label"],
-                "node_type": opk["node_type"],
-                "open": "true",
-                $css:{ "background-color": "#e0f8f1" },
-                "data": get_opk_indicators(nodes, edges, opk)
-            })
-        }
+    let opk = nodes.find(function (element){
+        return element["id"] === opk_id
+    })
+    if(opk){
+        data.push({
+            "id": opk["id"],
+            "label": opk["label"],
+            "open": "true",
+            $css:{"background-color": "#e0f8f1" },
+            "node_type": opk["node_type"],
+            "data": get_opk_indicators(nodes, edges, opk)
+        })
     }
     return data
 }
@@ -86,26 +82,27 @@ function graphData(nodes, edges, opk_id){
     let graph_nodes, graph_edges;
     graph_nodes = [];
     graph_edges = [];
-    for(let opk of nodes){
-        if(opk["node_type"] === "OPK" && opk["id"] === opk_id){
-            graph_nodes.push(opk)
-            for(let ind of nodes){
-                if(ind["node_type"] === "Indicator"){
-                    for(let edge_ind of edges){
-                        if(edge_ind["from"] === ind["id"] && edge_ind["to"] === opk["id"]){
-                            graph_nodes.push(ind)
-                            graph_edges.push(edge_ind)
-                            for(let des of nodes){
-                                if(des["node_type"] === "Descriptor"){
-                                    for(let edge_des of edges){
-                                        if(edge_des["from"] === des["id"] && edge_des["to"] === ind["id"]){
-                                            graph_nodes.push(des)
-                                            graph_edges.push(edge_des)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+    let opk = nodes.find(function (element){
+        return element["id"] === opk_id
+    })
+    if(opk){
+        graph_nodes.push(opk)
+        let ind_nodes = nodes.filter(i => i["node_type"] === "Indicator")
+        for (let ind of ind_nodes){
+            let edge = edges.find(function (element){
+                return element["from"] === ind["id"] && element["to"] === opk["id"]
+            })
+            if(edge){
+                graph_edges.push(edge)
+                graph_nodes.push(ind)
+                let des_nodes = nodes.filter(i => i["node_type"] === "Descriptor")
+                for(let des of des_nodes) {
+                    let edge = edges.find(function (element) {
+                        return element["from"] === des["id"] && element["to"] === ind["id"]
+                    })
+                    if (edge) {
+                        graph_edges.push(edge)
+                        graph_nodes.push(des)
                     }
                 }
             }
@@ -118,21 +115,21 @@ function graphData(nodes, edges, opk_id){
 function get_subject_indicators(nodes, edges, subj, id){
     let ind_data;
     ind_data = [];
-    for(let ind of nodes){
-        if(ind["node_type"] === "Indicator"){
-            for(let ind_edge of edges){
-                if(ind_edge["from"] === ind["id"] && ind_edge["to"] === subj["id"]){
-                    id += 1
-                    ind_data.push({
-                        "id": id,
-                        "node_id": ind["id"],
-                        "label": ind["label"],
-                        "node_type": ind["node_type"],
-                        "open": "true",
-                        $css:{ "background-color": "#ecf8e0" },
-                    })
-                }
-            }
+    let ind_nodes = nodes.filter(n => n["node_type"] === "Indicator")
+    for(let ind of ind_nodes){
+        let ind_edge = edges.find(function (element){
+            return element["from"] === ind["id"] && element["to"] === subj["id"]
+        })
+        if(ind_edge){
+            id += 1
+            ind_data.push({
+                "id": id,
+                "node_id": ind["id"],
+                "label": ind["label"],
+                "node_type": ind["node_type"],
+                "open": "true",
+                $css:{ "background-color": "#ecf8e0" }
+            })
         }
     }
     return {"data":ind_data, "id": id}
@@ -143,21 +140,21 @@ function mainTableData(nodes, edges){
     let id = 0
     let data;
     data = [];
-    for(let subj of nodes){
-        if(subj["node_type"] === "Subject") {
-            id += 1
-            let ind_data = get_subject_indicators(nodes, edges, subj, id)
-            data.push({
-                "id": id,
-                "node_id": subj["id"],
-                "label": subj["label"],
-                "node_type": subj["node_type"],
-                "open": "true",
-                $css:{"background-color": "#e0ecf8"},
-                "data": ind_data["data"]
-            })
-            id = ind_data["id"]
-        }
+
+    let subj_nodes = nodes.filter(s => s["node_type"] === "Subject")
+    for(let subj of subj_nodes) {
+        id += 1
+        let ind_data = get_subject_indicators(nodes, edges, subj, id)
+        data.push({
+            "id": id,
+            "node_id": subj["id"],
+            "label": subj["label"],
+            "node_type": subj["node_type"],
+            "open": "true",
+            $css: {"background-color": "#e0ecf8"},
+            "data": ind_data["data"]
+        })
+        id = ind_data["id"]
     }
     return data
 }
@@ -169,19 +166,18 @@ function mainGraphData(nodes, edges){
     let data_edges
     data_edges = []
 
-    for(let subj of nodes){
-        if(subj["node_type"] === "Subject"){
-            data_nodes.push(subj)
-            for(let ind of nodes){
-                if(ind["node_type"] === "Indicator"){
-                    for(let edge of edges){
-                        if(edge["from"] === ind["id"] && edge["to"] === subj["id"]){
-                            data_edges.push(edge)
-                            if(checkIfExists(data_nodes, ind["id"]) === false) {
-                                data_nodes.push(ind)
-                            }
-                        }
-                    }
+    let subj_nodes = nodes.filter(s => s["node_type"] === "Subject")
+    for (let subj of subj_nodes){
+        data_nodes.push(subj)
+        let ind_nodes = nodes.filter(i => i["node_type"] === "Indicator")
+        for(let ind of ind_nodes){
+            let edge = edges.find(function (element){
+                return element["from"] === ind["id"] && element["to"] === subj["id"]
+            })
+            if(edge){
+                data_edges.push(edge)
+                if(!checkIfExists(data_nodes, ind["id"])) {
+                    data_nodes.push(ind)
                 }
             }
         }
@@ -193,14 +189,11 @@ function mainGraphData(nodes, edges){
 function getIndicatorList(nodes){
     let data;
     data = [];
-    for(let ind of nodes){
-        if(ind["node_type"] === "Indicator") {
-            data.push({
-                "id": ind["id"],
-                "value": ind["label"],
-            })
-        }
-    }
+    let tmp_data = nodes.filter(ind => ind["node_type"] === 'Indicator')
+    tmp_data.forEach(tmp => data.push({
+        "id":tmp["id"],
+        "value":tmp["label"]
+    }))
     return data
 }
 
@@ -208,14 +201,11 @@ function getIndicatorList(nodes){
 function getOPKList(nodes){
     let data
     data = []
-    for(let opk of nodes){
-        if(opk["node_type"] === "OPK"){
-            data.push({
-                "id": opk["id"],
-                "value": opk["label"],
-            })
-        }
-    }
+    let tmp_data = nodes.filter(opk => opk["node_type"] === 'OPK')
+    tmp_data.forEach(tmp => data.push({
+        "id":tmp["id"],
+        "value":tmp["label"]
+    }))
     return data
 }
 
@@ -270,11 +260,9 @@ function getHelpData(){
     return data
 }
 
+//Функция проверки, что узел с таким идентификатором уже добавлен в список узлов
 function checkIfExists(nodes, node_id){
-    for(let n of nodes){
-        if(n["id"] === node_id){
-            return true
-        }
-    }
-    return false
+    return  nodes.find(function (element){
+            return element["id"] === node_id
+    })
 }

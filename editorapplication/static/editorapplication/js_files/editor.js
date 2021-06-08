@@ -945,7 +945,7 @@ function graphDrawOnClick(){
 //Функция для отображения графа компетенции
 function graphDraw() {
     let opk_id = getOPKId(parsedNodes, parsedRelationShips, graphId)
-    if(opk_id !== "") {
+    if(opk_id){
         graph_data = graphData(parsedNodes, parsedRelationShips, opk_id["id"])
 
         nodes = new vis.DataSet(graph_data["nodes"]);
