@@ -820,6 +820,8 @@ function tableDrawOnClick(){
     mytable.style.display = 'block'
     tableButton.hidden = true
     graphButton.hidden = false
+    chosenNode = ''
+    chosenNode_Type = ''
 
     mode = "Table"
 
@@ -908,6 +910,8 @@ function graphDrawOnClick(){
     mynetwork.style.display = 'block'
     tableButton.hidden = false
     graphButton.hidden = true
+    chosenNode = ''
+    chosenNode_Type = ''
 
     mode = "Graph"
     switch (part) {
