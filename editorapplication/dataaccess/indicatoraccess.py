@@ -1,5 +1,6 @@
 from editorapplication.models import Indicator, OPK, Subject
 
+#Функция получения списка индикаторов
 def indicator_get():
     indVar = Indicator.nodes.all()
     response = []
@@ -21,6 +22,7 @@ def indicator_get():
         response.append(obj)
     return response, connections
 
+#Функция получения связей индикатора
 def getConnections(indicator):
     try:
         response = []
@@ -44,7 +46,7 @@ def getConnections(indicator):
         response = {"error": ["Error is", str(e)]}
         return response
 
-
+#Функция редактирования индикатора
 def indicator_put(uid, new_label):
     obj = Indicator.nodes.get(uid=uid)
     obj.label = new_label
@@ -58,6 +60,7 @@ def indicator_put(uid, new_label):
     }
     return response
 
+#Функция удаления индикатора
 def indicator_delete(uid):
     try:
         obj = Indicator.nodes.get(uid=uid)
@@ -67,6 +70,7 @@ def indicator_delete(uid):
     except:
         return "error"
 
+#Функция удаления связи индикатора с дисциплиной
 def indtosubj_delete(uid, parent_id):
     try:
         obj1 = Subject.nodes.get(uid=parent_id)
@@ -77,6 +81,7 @@ def indtosubj_delete(uid, parent_id):
     except:
         return {"error": "error"}
 
+#Функция добавления индикатора
 def indicator_post(parent_id, new_label):
     try:
         obj = Indicator(label=new_label)
@@ -95,7 +100,7 @@ def indicator_post(parent_id, new_label):
     except Exception as e:
         return {"error": e}
 
-
+#Функция добавления связи с компетенцией
 def postConnections(parent_id, new_id):
     try:
         obj1 = OPK.nodes.get(uid=parent_id)
@@ -110,7 +115,7 @@ def postConnections(parent_id, new_id):
     except:
         return {"error": "error"}
 
-
+#Функция добавления связи с дисциплиной
 def indtosubjPost(parent_id, new_id):
     try:
         obj1 = Subject.nodes.get(uid=parent_id)

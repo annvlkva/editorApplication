@@ -6,5 +6,5 @@ from editorapplication.views import showPage, get_data
 urlpatterns = [
     path('', data),
     path('data', showPage),
-    path('get_data', get_data),
+    path('get_data', get_data)
 ]

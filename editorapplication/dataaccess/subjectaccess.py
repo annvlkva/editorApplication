@@ -1,5 +1,6 @@
 from editorapplication.models import Subject
 
+#Функция получения дисциплин
 def subject_get():
     subjVar = Subject.nodes.all()
     response = []
@@ -15,6 +16,7 @@ def subject_get():
         response.append(obj)
     return response
 
+#Функция редактирования дисциплины
 def subject_put(uid, new_label):
     obj = Subject.nodes.get(uid=uid)
     obj.label = new_label
@@ -28,6 +30,7 @@ def subject_put(uid, new_label):
     }
     return response
 
+#Функция добавления дисциплины
 def subject_post(label):
     try:
         obj = Subject(label=label)
@@ -44,6 +47,7 @@ def subject_post(label):
     except Exception as e:
         return {"error": e}
 
+#Функия удаления дисциплины
 def subject_delete(uid):
     try:
         obj = Subject.nodes.get(uid=uid)

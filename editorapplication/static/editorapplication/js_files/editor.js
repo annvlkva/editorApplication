@@ -37,6 +37,9 @@ watchButton.hidden = true
 backButton = document.getElementById("back")
 backButton.addEventListener('click', mainOnClicked)
 backButton.hidden = true
+checkButton = document.getElementById("check")
+checkButton.addEventListener('click', checkOnClicked)
+checkButton.hidden = true
 
 //Объявление глобальных переменных
 const host = '127.0.0.1'
@@ -44,7 +47,94 @@ var parsedNodes = [], parsedRelationShips = []
 var chosenNode, nodeData, chosenNode_Type, parent_node
 var grida
 var mode, part, graphId
-var indicatorList = [], opkList = [], helpData = []
+var indicatorList = [], opkList = [], helpData = [], checkData = [], checkList = []
+
+var checkTable = {
+    view:"form",
+    id:"checkForm",
+    elements:[{
+        view:"datatable",
+        id:"checkTable",
+        autoheight: false,
+        autowidth: true,
+        fixedRowHeight:false,
+        columns:[
+            { id:"ch1", header:{ content:"masterCheckbox" }, checkValue:'on', uncheckValue:'off', template:"{common.checkbox()}", width:40},
+            { id:"type", header:"type", width: 100},
+            { id:"label", header:"label", width: 200},
+        ],
+        data: checkData,
+
+        on:{
+            onCheck:function(rowId, colId, state){
+                var record = $$("checkTable").getItem(rowId)
+                var type = record.type
+                if(state === "on"){
+                    checkList.push({
+                        "id": rowId,
+                        "type": type,
+                    })
+                }
+                if(state === "off"){
+                    for (i in checkList) {
+                            if (checkList[i]["id"] === rowId) {
+                                checkList.splice(i, 1)
+                            }
+                        }
+                }
+            }
+        }
+    },
+        {
+            view: "button", value: "Удалить", align: "right", click: async function () {
+                for (let check of checkList) {
+                    let response = await deleteData('http://' + host.toString() + ':8000/get_data', {
+                        id: check["id"], type: check["type"]
+                    })
+                    if (response.status !== 200) {
+                        alert(await response.text() + ' ' + response.status.toString())
+                        return
+                    }
+
+                    let body = await response.json()
+                    if (body["deleted"] === "deleted") {
+                        for (let i in parsedRelationShips) {
+                            console.log("i", i)
+                            if (check["id"] === parsedRelationShips[i]["from"]) {
+                                parsedRelationShips.splice(i, 1)
+                            }
+                        }
+                        for (let i in parsedNodes) {
+                            if (check["id"] === parsedNodes[i]["id"]) {
+                                parsedNodes.splice(i, 1)
+                            }
+                        }
+                    }
+                }
+                $$("checkForm").hide()
+                showAllOnClicked()
+            }
+        }
+    ]
+}
+
+webix.ui({
+    view:"window",
+    position: "center",
+    id:"winCheck",
+    width:400,
+    height: 300,
+    head:{
+        view:"toolbar", margin:-4, cols:[
+            {view:"label", label: "Удалить" },
+            { view:"button", label:"close", width: 60, click: function(){
+                $$('checkForm').hide();
+            }}
+        ]
+    },
+    body: webix.copy(checkTable)
+})
+
 
 //Форма для отображения инструкции пользования приложением
 var showHelp = {
@@ -59,7 +149,6 @@ var showHelp = {
         }
     ]
 }
-
 
 webix.ui({
     view:"window", move:true,
@@ -620,10 +709,20 @@ async function addSubjectOnClick(){
 //Обработка нажатия кнопки "Индикатор"
 async function addIndicatorOnClick(){
     indicatorList = getIndicatorList(parsedNodes)
-    console.log(indicatorList)
     $$("indicatorCombo").define("options",indicatorList);
     $$("indicatorCombo").refresh();
     showForm("win_indicator_add")
+}
+
+//Обработка нажатия кнопки "Проверить"
+async function checkOnClicked(){
+    console.log("check clicked")
+    checkList = []
+    checkData = checkToDelete(parsedNodes, parsedRelationShips)
+    $$("checkTable").clearAll()
+    $$("checkTable").define("data", checkData)
+    $$("checkTable").refresh()
+    showForm("winCheck")
 }
 
 //Функция для определения активных кнопок
@@ -731,6 +830,7 @@ function showAllOnClicked(){
     backButton.hidden = true
     showAllButton.hidden = true
     hideAllButton.hidden = false
+    checkButton.hidden = false
 
     content.style.display = 'none'
     mytable.style.display = 'none'
@@ -795,6 +895,7 @@ function showAllOnClicked(){
 function hideAllOnClicked(){
     hideAllButton.hidden = true
     showAllButton.hidden = false
+    checkButton.hidden = true
 
     chooseMode()
 }

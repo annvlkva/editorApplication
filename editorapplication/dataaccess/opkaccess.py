@@ -1,5 +1,6 @@
 from editorapplication.models import OPK
 
+#Функция получения компетенция
 def opk_get():
     opkVar = OPK.nodes.all()
     response = []
@@ -15,6 +16,7 @@ def opk_get():
         response.append(obj)
     return response
 
+#Функция редактирования компетенции
 def opk_put(uid, new_label):
     obj = OPK.nodes.get(uid=uid)
     obj.label = new_label
@@ -28,6 +30,7 @@ def opk_put(uid, new_label):
     }
     return response
 
+#Функция добавления компетенции
 def opk_post(label):
     try:
         obj = OPK(label=label)
@@ -44,6 +47,7 @@ def opk_post(label):
     except Exception as e:
         return {"error": e}
 
+#Функция удвления компетенции
 def opk_delete(uid):
     try:
         obj = OPK.nodes.get(uid=uid)

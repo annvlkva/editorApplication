@@ -12,6 +12,7 @@ from editorapplication.dataaccess.subjectaccess import subject_post, subject_get
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
 def data(request):
+    #Запрос на получение данных
     if request.method == 'GET':
         try:
             response = []
@@ -44,6 +45,7 @@ def data(request):
             # return response
             return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR, safe=False)
 
+    #Запрос на редактирование данных
     if request.method == 'PUT':
         try:
             id = request.data["id"]
@@ -67,6 +69,7 @@ def data(request):
             response = {"error": ["Error is ", str(e)]}
             return JsonResponse(response, safe=False)
 
+    #Запрос на удаление данных
     if request.method == "DELETE":
         try:
             uid = request.data["id"]
@@ -94,6 +97,7 @@ def data(request):
             print(response)
             return JsonResponse(response, safe=False)
 
+    #Запрос на добавление данных
     if request.method == "POST":
         try:
             node_type = request.data["type"]

@@ -266,3 +266,67 @@ function checkIfExists(nodes, node_id){
             return element["id"] === node_id
     })
 }
+
+//Функция поиска доступных к удалению узлов
+function checkToDelete(nodes, edges){
+    let data
+    data = []
+    let ind_nodes = nodes.filter(i => i["node_type"] === "Indicator")
+    for(let ind of ind_nodes) {
+        let ind_edge = edges.find(function (element) {
+            let subj_nodes = nodes.filter(s => s["node_type"] === "Subject")
+            for(let subj of subj_nodes) {
+                if (element["from"] === ind["id"] && element["to"] === subj["id"]){
+                    return true
+                }
+            }
+        })
+        if (!ind_edge) {
+            data.push({
+                "id": ind["id"],
+                "label": ind["label"],
+                "type": ind["node_type"],
+            })
+            let children = get_descriptors(nodes, edges, ind)
+            for(let child of children){
+                data.push({
+                    "id": child["id"],
+                    "label": child["label"],
+                    "type": child["node_type"],
+                })
+            }
+        }
+    }
+    let opk_nodes = nodes.filter(o => o["node_type"] === "OPK")
+    for(let opk of opk_nodes){
+        let edge = edges.find(function (element){
+            return element["to"] === opk["id"]
+        })
+        if(!edge){
+            data.push({
+                "id": opk["id"],
+                "label": opk["label"],
+                "type": opk["node_type"],
+            })
+        }
+    }
+    let des_nodes = nodes.filter(i => i["node_type"] === "Descriptor")
+    for(let des of des_nodes) {
+        let des_edge = edges.find(function (element) {
+            let ind_nodes = nodes.filter(s => s["node_type"] === "Indicator")
+            for (let ind of ind_nodes) {
+                if (element["from"] === des["id"] && element["to"] === ind["id"]) {
+                    return true
+                }
+            }
+        })
+        if (!des_edge) {
+            data.push({
+                "id": des["id"],
+                "label": des["label"],
+                "type": des["node_type"],
+            })
+        }
+    }
+    return data
+}

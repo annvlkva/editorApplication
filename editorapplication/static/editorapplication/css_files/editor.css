@@ -15,7 +15,7 @@
 
     #add_node, #edit_node, #delete_node, #show_graph,
     #show_table, #show_help, #back, #watch, #add_indicator,
-    #add_subject, #show_all, #hide_all{
+    #add_subject, #show_all, #hide_all, #check{
         background-color: #42a5f5;
         border-color: #42a5f5;
         color: #eeffff;

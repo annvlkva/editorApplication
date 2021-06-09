@@ -1,5 +1,6 @@
 from editorapplication.models import Descriptor, OPK, Indicator
 
+#Функция получения дескрипторов
 def descriptor_get():
     desVar = Descriptor.nodes.all()
     response = []
@@ -21,6 +22,7 @@ def descriptor_get():
 
     return response, connections
 
+#Функция получения связей дескрипторов
 def getConnections(descriptor):
     try:
         response = []
@@ -40,7 +42,7 @@ def getConnections(descriptor):
         response = {"error": "error"}
         return response
 
-
+#Функция редактирования дескриптора
 def descriptor_put(uid, new_label):
     try:
         obj = Descriptor.nodes.get(uid=uid)
@@ -57,6 +59,7 @@ def descriptor_put(uid, new_label):
     except:
         return {"error": "error"}
 
+#Функция удаления дескриптора
 def descriptor_delete(uid):
     try:
         obj = Descriptor.nodes.get(uid=uid)
@@ -66,6 +69,7 @@ def descriptor_delete(uid):
     except Exception as e:
         return "error"
 
+#Функция добавления дескриптора
 def descriptor_post(parent_id, new_label):
     try:
         obj = Descriptor(label=new_label)
@@ -84,6 +88,7 @@ def descriptor_post(parent_id, new_label):
     except Exception as e:
         return {"error": e}
 
+#Функция добавления связи
 def postConnections(parent_id, new_id):
     try:
         obj1 = Indicator.nodes.get(uid=parent_id)
